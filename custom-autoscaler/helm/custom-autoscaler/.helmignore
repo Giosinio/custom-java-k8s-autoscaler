@@ -1,0 +1,10 @@
+# Patterns to ignore when packaging Helm charts
+*.tgz
+*.bak
+*.orig
+.git/
+.gitignore
+target/
+.idea/
+.vscode/
+*.iml

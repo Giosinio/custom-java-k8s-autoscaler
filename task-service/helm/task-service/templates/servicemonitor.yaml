@@ -1,0 +1,22 @@
+{{- if .Values.prometheus.enabled }}
+{{- if .Values.prometheus.serviceMonitor.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "task-service.fullname" . }}-sm
+  namespace: {{ .Values.prometheus.serviceMonitor.namespace | default "default" }}
+  labels:
+{{ toYaml .Values.prometheus.serviceMonitor.labels | indent 4 }}
+spec:
+  selector:
+    matchLabels:
+      app: task-service
+  namespaceSelector:
+    matchNames:
+      - {{ .Release.Namespace }}
+  endpoints:
+    - port: http
+      path: /actuator/prometheus
+      interval: 15s
+{{- end }}
+{{- end }}
