@@ -1,6 +1,6 @@
 package com.csubb.dissertation.customautoscaler.service;
 
-import com.csubb.dissertation.customautoscaler.algorithm.ScalingContext;
+import com.csubb.dissertation.customautoscaler.infrastructure.ScaledDeployment;
 import io.kubernetes.client.openapi.ApiClient;
 import io.kubernetes.client.openapi.ApiException;
 import io.kubernetes.client.openapi.apis.AppsV1Api;
@@ -31,7 +31,6 @@ import java.util.function.Predicate;
 @Service
 public class KubernetesClientService {
 
-    private static final Integer DEFAULT_REPLICA_COUNT = 2;
     private static final Integer MIN_REPLICAS = 2;
     private static final Integer MAX_REPLICAS = 15;
 
@@ -53,59 +52,52 @@ public class KubernetesClientService {
      * Scale a deployment by replacing its scale sub-resource.
      * @param namespace Kubernetes namespace where the deployment resides
      * @param deploymentName name of the deployment
-     * @param deltaReplicas the number of replicas to scale by (positive to scale up, negative to scale down)
+     * @param updatedReplicaCount the number of replicas to scale by (positive to scale up, negative to scale down)
      * @return the new replica count (after scaling)
      * @throws ApiException if the API request fails
      */
-    public ScaleOperationResponse scaleDeployment(String namespace, String deploymentName, int deltaReplicas) throws ApiException {
+    public ScaleOperationResponse scaleDeployment(String namespace, String deploymentName, int updatedReplicaCount) throws ApiException {
         // read current scale (method signature: name, namespace)
         V1Scale currentScale = appsV1Api.readNamespacedDeploymentScale(deploymentName, namespace).execute();
-        Integer currentReplicasCount = Optional.ofNullable(currentScale).map(V1Scale::getSpec).map(V1ScaleSpec::getReplicas).orElse(null);
 
-        if(Objects.isNull(currentReplicasCount)) {
-            log.warn("Current replica count is unknown for deployment: {}", deploymentName);
-            currentReplicasCount = DEFAULT_REPLICA_COUNT;
-        }
-
-        Integer updatedReplicasNumber = clampReplicas(currentReplicasCount + deltaReplicas);
-        if(Objects.equals(currentReplicasCount, updatedReplicasNumber)) {
-            return new ScaleOperationResponse(false, currentReplicasCount);
-        }
-        V1ScaleSpec spec = Objects.nonNull(currentScale) ? currentScale.getSpec() : new V1ScaleSpec();
-        spec.setReplicas(updatedReplicasNumber);
+        V1ScaleSpec spec = Objects.nonNull(currentScale) ? Objects.requireNonNull(currentScale.getSpec()) : new V1ScaleSpec();
+        spec.setReplicas(updatedReplicaCount);
 
         currentScale = Objects.nonNull(currentScale) ? currentScale : new V1Scale();
         currentScale.setSpec(spec);
         appsV1Api.replaceNamespacedDeploymentScale(deploymentName, namespace, currentScale).execute();
 
-        log.info("Scaling decision: Scale {} replicas (currentReplicasNumber={} | delta={} | updatedReplicasNumber={})",
-                updatedReplicasNumber > currentReplicasCount ? "up" : "down", currentReplicasCount, deltaReplicas, updatedReplicasNumber);
-        return new ScaleOperationResponse(true, updatedReplicasNumber);
+        return new ScaleOperationResponse(true, updatedReplicaCount);
     }
 
     /**
      * Checks if all the pods are ready for a deployment.
-     * @param scalingContext {@link ScalingContext}
+     * @param scaledDeployment {@link ScaledDeployment}
      * @return true - if all pods are ready, false otherwise
      */
-    public boolean checkAllPodsAreReadyForDeployment(@NotNull ScalingContext scalingContext, @NotNull Integer targetReplicas) {
-        V1PodList podList = getPodsForDeployment(scalingContext.getNamespace(), scalingContext.getScaledDeployment());
+    public boolean checkAllPodsAreReadyForDeployment(@NotNull ScaledDeployment scaledDeployment, @NotNull Integer targetReplicas) {
+        V1PodList podList = getPodsForDeployment(scaledDeployment.getNamespace(), scaledDeployment.getService());
         if(Objects.isNull(podList)) {
-            log.error("Failed to fetch pods for deployment {}, cannot check readiness", scalingContext.getScaledDeployment());
+            log.error("Failed to fetch pods for deployment {}, cannot check readiness", scaledDeployment.getService());
             return false;
         }
         else if (podList.getItems().size() != targetReplicas) {
             return false;
         }
 
-        log.info("Checking readiness for pods of deployment {}: found {} pods", scalingContext.getScaledDeployment(), podList.getItems().size());
+        log.info("Checking readiness for pods of deployment {}: found {} pods", scaledDeployment.getService(), podList.getItems().size());
 
         long readyPodsCount = podList.getItems().stream().filter(checkPodIsReady()).count();
         if(readyPodsCount < podList.getItems().size()) {
-            log.info("{}/{} pods are ready for deployment {}", readyPodsCount, podList.getItems().size(), scalingContext.getScaledDeployment());
+            log.info("{}/{} pods are ready for deployment {}", readyPodsCount, podList.getItems().size(), scaledDeployment.getService());
             return false;
         }
         return true;
+    }
+
+    public Integer getDeploymentReplicaCount(String namespace, String deploymentName) throws ApiException {
+        V1Scale currentScale = appsV1Api.readNamespacedDeploymentScale(deploymentName, namespace).execute();
+        return Optional.ofNullable(currentScale).map(V1Scale::getSpec).map(V1ScaleSpec::getReplicas).orElse(null);
     }
 
     private V1PodList getPodsForDeployment(String namespace, String deploymentName) {
@@ -128,6 +120,7 @@ public class KubernetesClientService {
         };
     }
 
+    //TODO - add this logic at the strategy level, not here
     private static Integer clampReplicas(Integer updatedReplicasNumber) {
         if(updatedReplicasNumber < MIN_REPLICAS) {
             return MIN_REPLICAS;

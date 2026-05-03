@@ -20,24 +20,24 @@ import java.util.Objects;
 @RequestMapping("/api/custom-autoscaler")
 public class CustomAutoscalerController {
 
-    private final KubernetesClientService kubernetesClientService;
+    private final KubernetesClientService k8sClientService;
 
     @PostMapping("/scale")
-    public ResponseEntity<ScaleDeploymentResponseDTO> scaleDeployment(@Valid @RequestBody ScaleDeploymentDTO scaleDeploymentDTO) {
+    public ResponseEntity<ScaleDeploymentResponseDTO> scaleDeployment(@Valid @RequestBody ScaleDeploymentDTO scaleDeploymentDTO) throws ApiException {
         String deploymentName = scaleDeploymentDTO.deploymentName();
         String namespace = Objects.nonNull(scaleDeploymentDTO.namespace()) ? scaleDeploymentDTO.namespace() : "default";
-        int updatedReplicas = scaleDeploymentDTO.updatedNumberOfReplicas();
+        int currentReplicaCount = k8sClientService.getDeploymentReplicaCount(namespace, deploymentName);
 
         try {
-            Integer prevReplicas = kubernetesClientService.scaleDeployment(namespace, deploymentName, updatedReplicas).updatedNumberOfReplicas();
+            Integer updatedReplicaCount = k8sClientService.scaleDeployment(namespace, deploymentName, scaleDeploymentDTO.updatedReplicaCount()).updatedReplicaCount();
 
-            return ResponseEntity.ok(new ScaleDeploymentResponseDTO(deploymentName, prevReplicas, updatedReplicas, true, null));
+            return ResponseEntity.ok(new ScaleDeploymentResponseDTO(deploymentName, currentReplicaCount, updatedReplicaCount, true, null));
         } catch (ApiException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new ScaleDeploymentResponseDTO(deploymentName, -1, updatedReplicas, false, "Kubernetes API error: " + e.getResponseBody()));
+                    .body(new ScaleDeploymentResponseDTO(deploymentName, -1, currentReplicaCount, false, "Kubernetes API error: " + e.getResponseBody()));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new ScaleDeploymentResponseDTO(deploymentName, -1, updatedReplicas, false, "Unexpected error: " + e.getMessage()));
+                    .body(new ScaleDeploymentResponseDTO(deploymentName, -1, currentReplicaCount, false, "Unexpected error: " + e.getMessage()));
         }
     }
 }

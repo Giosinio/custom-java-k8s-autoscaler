@@ -9,8 +9,8 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record ScaleDeploymentResponseDTO(
         String deploymentName,
-        Integer previousReplicas,
-        Integer updatedReplicas,
+        Integer previousReplicaCount,
+        Integer currentReplicaCount,
         boolean success,
         String message
 ) {

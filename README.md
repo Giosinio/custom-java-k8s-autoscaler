@@ -26,10 +26,12 @@ Steps to start the cluster and to deploy the application and the autoscaler:
         - `- --kubelet-preferred-address-types=InternalIP,ExternalIP,Hostname`
 6. deploy task-service to the cluster, follow the steps from the task-service/README.md file
 7. deploy custom-autoscaler to the cluster, follow the steps from the custom-autoscaler/README.md file
+8. for running tests using k6, run `k6 run test-scenarios/demo_test.js` ()
 
 Useful terminal commands:
-- `kubectl get deployments` - list all deployments
-- `kubectl delete deployment task-service` - delete the current deployment from K8s
-- `minikube ssh -- docker images` - list all docker images in minikube
-- `minikube ssh -- docker rmi task-service:0.0.1`- remove a docker image from minikube
+- `kubectl get deployments` → list all deployments
+- `kubectl delete deployment task-service` → delete the current deployment from K8s
+- `minikube ssh -- docker images` → list all docker images in minikube
+- `minikube ssh -- docker rmi task-service:0.0.1`→ remove a docker image from minikube
+- `kubectl port-forward svc/prometheus-kube-prometheus-prometheus 9090:9090` → exposes Prometheus UI on localhost:9090
 - `kubectl port-forward svc/prometheus-grafana 3000:80` → exposes Grafana dashboard on localhost:3000

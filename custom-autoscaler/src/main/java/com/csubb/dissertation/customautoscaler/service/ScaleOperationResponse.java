@@ -2,6 +2,6 @@ package com.csubb.dissertation.customautoscaler.service;
 
 public record ScaleOperationResponse(
         boolean hasScaled,
-        int updatedNumberOfReplicas
+        int updatedReplicaCount
 ) {
 }

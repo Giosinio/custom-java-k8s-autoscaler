@@ -1,6 +1,6 @@
 package com.csubb.dissertation.customautoscaler.prometheus;
 
-import com.csubb.dissertation.customautoscaler.algorithm.ScalingContext;
+import com.csubb.dissertation.customautoscaler.infrastructure.ScaledDeployment;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -8,48 +8,43 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Objects;
 
+import static com.csubb.dissertation.customautoscaler.util.Util.isStable;
+
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class AvgCpuUtilizationStabilityMonitor {
 
     private static final Integer STABILITY_INTERVAL = 10;
-    private static final Double STABILITY_PERCENTAGE_THRESHOLD = 15d; // 5% change in CPU usage is considered unstable
+    private static final Double STABILITY_PERCENTAGE_THRESHOLD = 15d; // 15% change in CPU usage is considered unstable
 
     private final PrometheusClient prometheusClient;
 
-    public void waitForSystemStability(ScalingContext scalingContext) throws InterruptedException {
-        int initialCpuEvolutionSize = scalingContext.getAvgCpuPercentageEvolution().size();
+    public void waitForSystemStability(ScaledDeployment scaledDeployment) throws InterruptedException {
+        List<Double> avgCpuPercentageEvolution = scaledDeployment.getByPrometheusQueryType(PrometheusQueryType.AVG_CPU_USAGE_PERCENTAGE);
+        int initialCpuEvolutionSize = avgCpuPercentageEvolution.size();
         while(true) {
             Thread.sleep(1000 * 2);
-            if(scalingContext.getAvgCpuPercentageEvolution().size() - initialCpuEvolutionSize > STABILITY_INTERVAL && checkStability(scalingContext)) {
-                log.info("System has stabilized after scaling operation for application {}.", scalingContext.getScaledDeployment());
+            if(avgCpuPercentageEvolution.size() - initialCpuEvolutionSize > STABILITY_INTERVAL
+                    && isStable(avgCpuPercentageEvolution, STABILITY_INTERVAL, STABILITY_PERCENTAGE_THRESHOLD)) {
+                log.info("System has stabilized after scaling operation for application {}.", scaledDeployment.getService());
                 break;
             }
 
-            scalingContext.getAvgCpuPercentageEvolution().add(calculateAvgCpuUsagePercentage(scalingContext));
+            avgCpuPercentageEvolution.add(calculateAvgCpuUsagePercentage(scaledDeployment));
         }
     }
 
-    private Double calculateAvgCpuUsagePercentage(ScalingContext scalingContext) {
-        Double avgCpuUsage = prometheusClient.getPrometheusMetrics(scalingContext.getNamespace(), scalingContext.getScaledDeployment(), PrometheusQueryType.AVG_CPU_USAGE_CORES);
-        if(Objects.isNull(avgCpuUsage)) {
-            log.info("Failed to fetch average CPU usage for application {}, skipping this stability check iteration.", scalingContext.getScaledDeployment());
+    private Double calculateAvgCpuUsagePercentage(ScaledDeployment scaledDeployment) {
+        Double avgCpuUsageMillicores = prometheusClient.getPrometheusMetrics(scaledDeployment.getNamespace(), scaledDeployment.getService(), PrometheusQueryType.AVG_CPU_USAGE_MILLICORES);
+        if(Objects.isNull(avgCpuUsageMillicores)) {
+            log.info("Failed to fetch average CPU usage for application {}, skipping this stability check iteration.", scaledDeployment.getService());
             return null;
         }
 
-        Double avgCpuUsagePercentage = avgCpuUsage / scalingContext.getResourceRequestCpuCores() * 100;
+        Double avgCpuUsagePercentage = avgCpuUsageMillicores / scaledDeployment.getResourceRequestCpuMillicores() * 100;
         log.info("CPU Usage percentage: {}%", String.format("%.2f", avgCpuUsagePercentage));
 
         return avgCpuUsagePercentage;
-    }
-
-    private static boolean checkStability(ScalingContext scalingContext) {
-        List<Double> avgCpuEvolutionList = scalingContext.getAvgCpuPercentageEvolution();
-        List<Double> latestAvgCpuEvolution = avgCpuEvolutionList.subList(avgCpuEvolutionList.size() - STABILITY_INTERVAL - 1, avgCpuEvolutionList.size());
-        Double minAvgCpuUsage = latestAvgCpuEvolution.stream().min(Double::compareTo).orElse(null);
-        Double maxAvgCpuUsage = latestAvgCpuEvolution.stream().max(Double::compareTo).orElse(null);
-
-        return Objects.requireNonNull(maxAvgCpuUsage) - Objects.requireNonNull(minAvgCpuUsage) <= STABILITY_PERCENTAGE_THRESHOLD;
     }
 }

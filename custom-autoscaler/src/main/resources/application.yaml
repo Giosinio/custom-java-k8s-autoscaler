@@ -11,5 +11,12 @@ logging:
 
 prometheus:
   base-url: "http://prometheus-kube-prometheus-prometheus.default.svc.cluster.local:9090"
-  namespace: "default"
-  scaled-deployment: "task-service"
+
+custom-autoscaler:
+  namespace: ${CUSTOM_AUTOSCALER_SCALING_NAMESPACE:default}
+  target-services: [task-service]
+  scale-all-from-namespace: true
+  excluded-services-from-namespace: [custom-autoscaler, prometheus-kube-prometheus-alertmanager, prometheus-operated,
+                                     prometheus-prometheus-node-exporter, kubernetes, prometheus-kube-prometheus-prometheus,
+                                     prometheus-kube-state-metrics, prometheus-kube-prometheus-operator, prometheus-grafana,
+                                     alertmanager-operated]
