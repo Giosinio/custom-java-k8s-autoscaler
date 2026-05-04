@@ -31,9 +31,6 @@ import java.util.function.Predicate;
 @Service
 public class KubernetesClientService {
 
-    private static final Integer MIN_REPLICAS = 2;
-    private static final Integer MAX_REPLICAS = 15;
-
     private final AppsV1Api appsV1Api;
     private final CoreV1Api coreV1Api;
 
@@ -118,15 +115,5 @@ public class KubernetesClientService {
             List<V1PodCondition> conditions = Optional.ofNullable(pod.getStatus()).map(V1PodStatus::getConditions).orElse(List.of());
             return conditions.stream().anyMatch(c -> "Ready".equals(c.getType()) && "True".equals(c.getStatus()));
         };
-    }
-
-    //TODO - add this logic at the strategy level, not here
-    private static Integer clampReplicas(Integer updatedReplicasNumber) {
-        if(updatedReplicasNumber < MIN_REPLICAS) {
-            return MIN_REPLICAS;
-        } else if (updatedReplicasNumber > MAX_REPLICAS) {
-            return MAX_REPLICAS;
-        }
-        return updatedReplicasNumber;
     }
 }

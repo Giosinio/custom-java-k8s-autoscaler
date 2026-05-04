@@ -2,6 +2,7 @@ package com.csubb.dissertation.customautoscaler.algorithm;
 
 import com.csubb.dissertation.customautoscaler.infrastructure.ScaledDeployment;
 import com.csubb.dissertation.customautoscaler.prometheus.PrometheusQueryType;
+import com.csubb.dissertation.customautoscaler.util.Util;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -53,6 +54,7 @@ public class MovingAverageStrategy implements ScalingStrategy {
                 updatedReplicaCount = scaledDeployment.getReplicaCount();
             }
         }
+        updatedReplicaCount = Util.clampReplicas(updatedReplicaCount);
 
         if(updatedReplicaCount > scaledDeployment.getReplicaCount()) {
             if(isCooldown(updatedReplicaCount, scaledDeployment)) {

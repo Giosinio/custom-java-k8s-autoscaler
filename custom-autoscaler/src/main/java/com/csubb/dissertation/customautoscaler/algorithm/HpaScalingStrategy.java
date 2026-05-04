@@ -2,6 +2,7 @@ package com.csubb.dissertation.customautoscaler.algorithm;
 
 import com.csubb.dissertation.customautoscaler.infrastructure.ScaledDeployment;
 import com.csubb.dissertation.customautoscaler.prometheus.PrometheusQueryType;
+import com.csubb.dissertation.customautoscaler.util.Util;
 import lombok.RequiredArgsConstructor;
 
 import javax.annotation.PostConstruct;
@@ -39,6 +40,6 @@ public class HpaScalingStrategy implements ScalingStrategy {
             deltaReplica = -1 * (int) Math.floor(minToleranceCpuPercentage / lastCpuAverage);
         }
 
-        return scaledDeployment.getReplicaCount() + deltaReplica;
+        return Util.clampReplicas(scaledDeployment.getReplicaCount() + deltaReplica);
     }
 }

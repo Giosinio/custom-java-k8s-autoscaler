@@ -20,3 +20,6 @@ custom-autoscaler:
                                      prometheus-prometheus-node-exporter, kubernetes, prometheus-kube-prometheus-prometheus,
                                      prometheus-kube-state-metrics, prometheus-kube-prometheus-operator, prometheus-grafana,
                                      alertmanager-operated]
+  replica-constraints:
+    min-replicas: 2
+    max-replicas: 15

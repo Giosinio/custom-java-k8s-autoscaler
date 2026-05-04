@@ -2,6 +2,7 @@ package com.csubb.dissertation.customautoscaler.algorithm;
 
 import com.csubb.dissertation.customautoscaler.infrastructure.ScaledDeployment;
 import com.csubb.dissertation.customautoscaler.prometheus.PrometheusQueryType;
+import com.csubb.dissertation.customautoscaler.util.Util;
 import lombok.RequiredArgsConstructor;
 
 import javax.annotation.PostConstruct;
@@ -46,7 +47,7 @@ public class ProportionStrategy implements ScalingStrategy {
             targetPodsNumber = targetPodsNumber / (secondLatestAvgCpu / latestAvgCpu);
         }
 
-        return (int) targetPodsNumber;
+        return Util.clampReplicas((int) targetPodsNumber);
     }
 
 }
