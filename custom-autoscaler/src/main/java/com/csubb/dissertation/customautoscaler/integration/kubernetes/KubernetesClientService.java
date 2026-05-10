@@ -1,6 +1,6 @@
-package com.csubb.dissertation.customautoscaler.service;
+package com.csubb.dissertation.customautoscaler.integration.kubernetes;
 
-import com.csubb.dissertation.customautoscaler.infrastructure.ScaledDeployment;
+import com.csubb.dissertation.customautoscaler.domain.ScaledDeployment;
 import io.kubernetes.client.openapi.ApiClient;
 import io.kubernetes.client.openapi.ApiException;
 import io.kubernetes.client.openapi.apis.AppsV1Api;

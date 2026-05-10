@@ -1,4 +1,4 @@
-package com.csubb.dissertation.customautoscaler.prometheus;
+package com.csubb.dissertation.customautoscaler.integration.prometheus;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;

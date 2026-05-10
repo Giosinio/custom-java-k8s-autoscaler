@@ -1,8 +1,9 @@
-package com.csubb.dissertation.customautoscaler.infrastructure;
+package com.csubb.dissertation.customautoscaler.scaling.deployment;
 
-import com.csubb.dissertation.customautoscaler.algorithm.ScalingStrategy;
-import com.csubb.dissertation.customautoscaler.service.KubernetesClientService;
-import com.csubb.dissertation.customautoscaler.service.ScaleOperationResponse;
+import com.csubb.dissertation.customautoscaler.domain.ScaledDeployment;
+import com.csubb.dissertation.customautoscaler.scaling.strategy.ScalingStrategy;
+import com.csubb.dissertation.customautoscaler.integration.kubernetes.KubernetesClientService;
+import com.csubb.dissertation.customautoscaler.integration.kubernetes.ScaleOperationResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;

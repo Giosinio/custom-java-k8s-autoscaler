@@ -1,7 +1,8 @@
-package com.csubb.dissertation.customautoscaler.prometheus;
+package com.csubb.dissertation.customautoscaler.scaling;
 
-import com.csubb.dissertation.customautoscaler.infrastructure.ScaledDeployment;
-import com.csubb.dissertation.customautoscaler.infrastructure.DeploymentScaler;
+import com.csubb.dissertation.customautoscaler.domain.ScaledDeployment;
+import com.csubb.dissertation.customautoscaler.scaling.deployment.DeploymentScaler;
+import com.csubb.dissertation.customautoscaler.scaling.monitoring.AvgCpuUtilizationStabilityMonitor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;

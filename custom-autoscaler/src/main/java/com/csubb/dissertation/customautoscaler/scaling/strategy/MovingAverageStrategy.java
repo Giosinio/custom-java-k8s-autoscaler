@@ -1,7 +1,7 @@
-package com.csubb.dissertation.customautoscaler.algorithm;
+package com.csubb.dissertation.customautoscaler.scaling.strategy;
 
-import com.csubb.dissertation.customautoscaler.infrastructure.ScaledDeployment;
-import com.csubb.dissertation.customautoscaler.prometheus.PrometheusQueryType;
+import com.csubb.dissertation.customautoscaler.domain.ScaledDeployment;
+import com.csubb.dissertation.customautoscaler.integration.prometheus.PrometheusQueryType;
 import com.csubb.dissertation.customautoscaler.util.Util;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

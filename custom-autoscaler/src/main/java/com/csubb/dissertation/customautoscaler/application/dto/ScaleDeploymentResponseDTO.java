@@ -1,4 +1,4 @@
-package com.csubb.dissertation.customautoscaler.dto;
+package com.csubb.dissertation.customautoscaler.application.dto;
 
 
 import com.fasterxml.jackson.annotation.JsonInclude;

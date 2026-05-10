@@ -1,6 +1,6 @@
-package com.csubb.dissertation.customautoscaler.infrastructure;
+package com.csubb.dissertation.customautoscaler.domain;
 
-import com.csubb.dissertation.customautoscaler.prometheus.PrometheusQueryType;
+import com.csubb.dissertation.customautoscaler.integration.prometheus.PrometheusQueryType;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;

@@ -1,10 +1,10 @@
 package com.csubb.dissertation.customautoscaler;
 
-import com.csubb.dissertation.customautoscaler.algorithm.HpaScalingStrategy;
-import com.csubb.dissertation.customautoscaler.algorithm.ScalingStrategy;
-import com.csubb.dissertation.customautoscaler.infrastructure.DeploymentScaler;
-import com.csubb.dissertation.customautoscaler.infrastructure.SimpleDeploymentScaler;
-import com.csubb.dissertation.customautoscaler.service.KubernetesClientService;
+import com.csubb.dissertation.customautoscaler.scaling.strategy.HpaScalingStrategy;
+import com.csubb.dissertation.customautoscaler.scaling.strategy.ScalingStrategy;
+import com.csubb.dissertation.customautoscaler.scaling.deployment.DeploymentScaler;
+import com.csubb.dissertation.customautoscaler.scaling.deployment.SimpleDeploymentScaler;
+import com.csubb.dissertation.customautoscaler.integration.kubernetes.KubernetesClientService;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;

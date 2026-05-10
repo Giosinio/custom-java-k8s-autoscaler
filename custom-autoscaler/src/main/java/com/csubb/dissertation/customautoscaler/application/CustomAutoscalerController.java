@@ -1,8 +1,8 @@
-package com.csubb.dissertation.customautoscaler.controller;
+package com.csubb.dissertation.customautoscaler.application;
 
-import com.csubb.dissertation.customautoscaler.dto.ScaleDeploymentDTO;
-import com.csubb.dissertation.customautoscaler.dto.ScaleDeploymentResponseDTO;
-import com.csubb.dissertation.customautoscaler.service.KubernetesClientService;
+import com.csubb.dissertation.customautoscaler.application.dto.ScaleDeploymentDTO;
+import com.csubb.dissertation.customautoscaler.application.dto.ScaleDeploymentResponseDTO;
+import com.csubb.dissertation.customautoscaler.integration.kubernetes.KubernetesClientService;
 import io.kubernetes.client.openapi.ApiException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

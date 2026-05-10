@@ -1,11 +1,11 @@
-package com.csubb.dissertation.customautoscaler.scheduler;
+package com.csubb.dissertation.customautoscaler.application;
 
 import com.csubb.dissertation.customautoscaler.config.CustomAutoscalerProperties;
-import com.csubb.dissertation.customautoscaler.infrastructure.ScaledDeployment;
-import com.csubb.dissertation.customautoscaler.prometheus.PrometheusAPI;
-import com.csubb.dissertation.customautoscaler.prometheus.PrometheusQueryType;
-import com.csubb.dissertation.customautoscaler.prometheus.PrometheusScaler;
-import com.csubb.dissertation.customautoscaler.service.KubernetesClientService;
+import com.csubb.dissertation.customautoscaler.domain.ScaledDeployment;
+import com.csubb.dissertation.customautoscaler.integration.prometheus.PrometheusAPI;
+import com.csubb.dissertation.customautoscaler.integration.prometheus.PrometheusQueryType;
+import com.csubb.dissertation.customautoscaler.scaling.PrometheusScaler;
+import com.csubb.dissertation.customautoscaler.integration.kubernetes.KubernetesClientService;
 import com.csubb.dissertation.customautoscaler.util.Util;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
