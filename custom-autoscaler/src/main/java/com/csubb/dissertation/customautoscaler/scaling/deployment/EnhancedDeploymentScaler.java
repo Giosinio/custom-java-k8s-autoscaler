@@ -44,6 +44,8 @@ public class EnhancedDeploymentScaler extends AbstractDeploymentScaler {
             scaledDeployment.addMetricValue(new AbstractMap.SimpleEntry<>(PrometheusQueryType.AVG_CPU_USAGE_PERCENTAGE, avgCpuUsagePercentage));
 
             int updatedReplicaCount = scalingStrategy.calculateUpdatedReplicaCount(scaledDeployment);
+            log.info("Dynamic scaling needed for deployment {} in namespace {}. Current replica count: {}, Updated replica count: {}",
+                    scaledDeployment.getService(), scaledDeployment.getNamespace(), scaledDeployment.getReplicaCount(), updatedReplicaCount);
             k8sClientService.scaleDeployment(scaledDeployment.getNamespace(), scaledDeployment.getService(), updatedReplicaCount);
         }
     }

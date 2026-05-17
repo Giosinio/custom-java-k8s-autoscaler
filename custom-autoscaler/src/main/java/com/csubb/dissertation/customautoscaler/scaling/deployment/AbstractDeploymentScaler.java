@@ -20,9 +20,12 @@ public abstract class AbstractDeploymentScaler implements DeploymentScaler {
     public boolean scale(ScaledDeployment scaledDeployment) {
         int updatedReplicaCount = scalingStrategy.calculateUpdatedReplicaCount(scaledDeployment);
 
-        if(scaledDeployment.getReplicaCount() != updatedReplicaCount) {
+        if(scaledDeployment.getReplicaCount() == updatedReplicaCount) {
             return false;
         }
+
+        log.info("Scaling operation needed for deployment {} in namespace {}. Current replica count: {}, Updated replica count: {}",
+                scaledDeployment.getService(), scaledDeployment.getNamespace(), scaledDeployment.getReplicaCount(), updatedReplicaCount);
 
         ScaleOperationResponse scaleOperationResponse = k8sClientService.scaleDeployment(scaledDeployment.getNamespace(), scaledDeployment.getService(), updatedReplicaCount);
         if(!scaleOperationResponse.hasScaled()) {
